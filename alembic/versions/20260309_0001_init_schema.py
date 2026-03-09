@@ -1,4 +1,4 @@
-﻿"""init schema with seed data"""
+"""init schema with seed data"""
 
 import uuid
 from decimal import Decimal
@@ -14,11 +14,28 @@ branch_labels = None
 depends_on = None
 
 
-payment_status = sa.Enum('Created', 'Processing', 'Completed', 'Canceled', name='payment_status')
+payment_status = postgresql.ENUM(
+    'Created',
+    'Processing',
+    'Completed',
+    'Canceled',
+    name='payment_status',
+    create_type=False,
+)
 
 
 def upgrade() -> None:
-    payment_status.create(op.get_bind(), checkfirst=True)
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+                CREATE TYPE payment_status AS ENUM ('Created', 'Processing', 'Completed', 'Canceled');
+            END IF;
+        END
+        $$;
+        """
+    )
 
     op.create_table(
         'merchants',
@@ -116,4 +133,4 @@ def downgrade() -> None:
     op.drop_table('payments')
     op.drop_table('balances')
     op.drop_table('merchants')
-    payment_status.drop(op.get_bind(), checkfirst=True)
+    op.execute('DROP TYPE IF EXISTS payment_status')

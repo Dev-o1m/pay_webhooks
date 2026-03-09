@@ -1,4 +1,4 @@
-﻿import enum
+import enum
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -64,7 +64,13 @@ class Payment(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
     callback_url: Mapped[str] = mapped_column(String(1024), nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus, name='payment_status'), default=PaymentStatus.CREATED, nullable=False
+        Enum(
+            PaymentStatus,
+            name='payment_status',
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
+        ),
+        default=PaymentStatus.CREATED,
+        nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
