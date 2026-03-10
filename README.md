@@ -148,22 +148,22 @@ Swagger в этом проекте не умеет сам вычислять `X-
 
 ### Сценарий 1. Посмотреть баланс мерчанта
 
-1. Открой [http://localhost:8000/docs](http://localhost:8000/docs)
-2. Найди `GET /api/v1/me`
-3. Нажми `Try it out`
-4. Для мерчанта 1 вставь:
+1. Открыть [http://localhost:8000/docs](http://localhost:8000/docs)
+2. Найти `GET /api/v1/me`
+3. Нажать `Try it out`
+4. Для мерчанта 1 вставить:
    - `x-api-key`: `merchant-demo-token`
    - `x-signature`: `b273c1b53f0e1b2d89a5ddc5e418eb6acb126e7745ee26ea2658bcbe9f0102b1`
-5. Нажми `Execute`
+5. Нажать `Execute`
 
 ### Сценарий 2. Создать успешный платеж
 
-1. Найди `POST /api/v1/payments`
-2. Нажми `Try it out`
-3. Для мерчанта 1 вставь:
+1. Найти `POST /api/v1/payments`
+2. Нажать `Try it out`
+3. Для мерчанта 1 вставить:
    - `x-api-key`: `merchant-demo-token`
    - `x-signature`: `2f36650ef55e4b2fe082f99de1ea945751acec43b85825da257532d1692013f2`
-4. Вставь тело:
+4. Вставить тело:
 
 ```json
 {
@@ -172,16 +172,16 @@ Swagger в этом проекте не умеет сам вычислять `X-
 }
 ```
 
-5. Нажми `Execute`
-6. Подожди 2-3 секунды
-7. Снова вызови `GET /api/v1/me`
+5. Нажмать `Execute`
+6. Подождать 2-3 секунды
+7. Снова вызвать `GET /api/v1/me`
 
 ### Сценарий 3. Создать отмененный платеж
 
-1. В той же ручке `POST /api/v1/payments` вставь:
+1. В той же ручке `POST /api/v1/payments` вставить:
    - `x-api-key`: `merchant-demo-token`
    - `x-signature`: `680f77208786c454bb8f7feb322836fba61c599dd351574dde2c76cb992d86fa`
-2. Вставь тело:
+2. Вставить тело:
 
 ```json
 {
@@ -190,9 +190,9 @@ Swagger в этом проекте не умеет сам вычислять `X-
 }
 ```
 
-3. Нажми `Execute`
-4. Подожди 2-3 секунды
-5. Снова вызови `GET /api/v1/me`
+3. Нажмать `Execute`
+4. Подождать 2-3 секунды
+5. Снова вызвать `GET /api/v1/me`
 
 ## Важно
 
