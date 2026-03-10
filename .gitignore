@@ -1,5 +1,4 @@
-﻿.pytest_cache/
+.pytest_cache/
 __pycache__/
 .venv/
 *.pyc
-test.db

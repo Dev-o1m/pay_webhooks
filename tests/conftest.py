@@ -1,16 +1,15 @@
-﻿import os
+import os
 from decimal import Decimal
-from pathlib import Path
 from uuid import UUID
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import delete, update
+from sqlalchemy import create_engine, delete, text, update
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 os.environ['APP_NAME'] = 'Pay Webhooks Test'
-os.environ['DATABASE_URL'] = 'sqlite+aiosqlite:///./test.db'
-os.environ['ALEMBIC_DATABASE_URL'] = 'sqlite:///./test.db'
+os.environ['DATABASE_URL'] = 'postgresql+asyncpg://pay_user:pay_password@localhost:5432/payments_test'
+os.environ['ALEMBIC_DATABASE_URL'] = 'postgresql://pay_user:pay_password@localhost:5432/payments_test'
 os.environ['REDIS_URL'] = 'redis://localhost:6379/1'
 os.environ['PROVIDER_BASE_URL'] = 'http://testserver/provider'
 os.environ['PUBLIC_BASE_URL'] = 'http://testserver'
@@ -45,9 +44,22 @@ class FakeRedis:
         return None
 
 
-TEST_DB_PATH = Path('test.db')
+TEST_DATABASE_NAME = 'payments_test'
+ADMIN_DATABASE_URL = 'postgresql+psycopg2://pay_user:pay_password@localhost:5432/postgres'
 engine = create_async_engine(os.environ['DATABASE_URL'], future=True)
 TestSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+
+
+def ensure_test_database() -> None:
+    admin_engine = create_engine(ADMIN_DATABASE_URL, isolation_level='AUTOCOMMIT')
+    with admin_engine.connect() as connection:
+        exists = connection.execute(
+            text('SELECT 1 FROM pg_database WHERE datname = :db_name'),
+            {'db_name': TEST_DATABASE_NAME},
+        ).scalar()
+        if not exists:
+            connection.execute(text(f'CREATE DATABASE {TEST_DATABASE_NAME}'))
+    admin_engine.dispose()
 
 
 async def override_get_redis():
@@ -56,10 +68,10 @@ async def override_get_redis():
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
 async def prepare_database():
-    if TEST_DB_PATH.exists():
-        TEST_DB_PATH.unlink()
+    ensure_test_database()
 
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     async with TestSessionLocal() as session:
@@ -98,8 +110,6 @@ async def prepare_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
-    if TEST_DB_PATH.exists():
-        TEST_DB_PATH.unlink()
 
 
 @pytest_asyncio.fixture(autouse=True)
